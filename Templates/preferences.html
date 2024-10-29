@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preferences</title>
+</head>
+<body>
+    <h2>Select Your Diet Preferences and Allergies</h2>
+    <form method="POST">
+        <h3>Diet Preferences</h3>
+        {% for diet in diets %}
+            <input type="checkbox" name="diets" value="{{ diet.id }}"
+                {% if diet in user.diets %}checked{% endif %}>
+            {{ diet.name }}<br>
+        {% endfor %}
+
+        <h3>Allergies</h3>
+        {% for allergy in allergies %}
+            <input type="checkbox" name="allergies" value="{{ allergy.id }}"
+                {% if allergy in user.allergies %}checked{% endif %}>
+            {{ allergy.name }}<br>
+        {% endfor %}
+        <br>
+        <input type="submit" value="Save Preferences">
+    </form>
+</body>
+</html>

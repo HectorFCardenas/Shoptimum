@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment directories
+venv/
+env/
+.venv/
+.env/
+
+# Flask cache files
+instance/
+*.pyc
+
+# Secret files
+*.sqlite
+db.sqlite
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+
+# Logs and debug files
+*.log
+
+# Environment variables
+*.env
