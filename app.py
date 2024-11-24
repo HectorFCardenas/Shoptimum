@@ -31,7 +31,27 @@ allergies_association = db.Table(
     db.Column("allergy_id", db.Integer, db.ForeignKey("allergy.id"), primary_key=True),
 )
 
+recipe_diets = db.Table(
+    "recipe_diets",
+    db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"), primary_key=True),
+    db.Column("diet_id", db.Integer, db.ForeignKey("diet.id"), primary_key=True),
+)
 
+
+# recipe-specific ingredient table. We need a full table because of storing ingredient quantities/units
+class RecipeIngredient(db.Model):
+    __tablename__ = "RecipeIngredient"
+    id = db.Column(db.Integer, primary_key=True) # NOTE: may not be needed, not sure if spoonacular duplicates ingredients.
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit = db.Column(db.String(32), nullable=False)
+    
+    #orm stuff
+    recipe = db.relationship("Recipe", back_populates="ingredients")
+    ingredient = db.relationship("Ingredient", back_populates="recipes")
+
+#user database table
 class Users(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -50,24 +70,55 @@ class Users(UserMixin, db.Model):
     def has_filled_preferences(self):
         return bool(self.diets) or bool(self.allergies)
 
-
+#diet database table
 class Diet(db.Model):
     __tablename__ = "diet"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
 
-
+#allergy database table
 class Allergy(db.Model):
     __tablename__ = "allergy"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
+    
+    # recipe database table
+
+
+class Recipe(db.Model):
+    __tablename__ = "recipe"
+    id = db.Column(db.Integer, primary_key=True)
+    spoonacular_id = db.Column(db.Integer, unique=True, nullable=False)
+    name = db.Column(db.String(250), unique=False, nullable=False)  # i think spoonacular might have duplicate recipe names
+    description = db.Column(db.String)
+    
+    #relational ORM stuff (not part of schema)
+    diets = db.relationship("Diet", secondary=recipe_diets, backref=db.backref("recipe", lazy="dynamic"))
+    ingredients = db.relationship("RecipeIngredient", back_populates="recipe")
+    
+#ingredient database table
+class Ingredient(db.Model):
+    __tablename__ = "ingredient"
+    id = db.Column(db.Integer, primary_key=True)
+    spoonacular_id = db.Column(db.Integer, unique=True, nullable=False)
+    name = db.Column(db.String(250), unique=False, nullable=False) #i think spoonacular might have duplicate ingredient names
+    
+    #relational ORM stuff
+    recipes = db.relationship("RecipeIngredient", back_populates="ingredient")
+    
+
+
+#NOTE: skipping allergies for now since spoonacular doesn't list them
+#NOTE: recipe needs to store the recipe description, as well as amount per ingredient
+#TODO: if we have time, add an ingredient table with per-ingredient information (per serving?)
+
 
 
 with app.app_context():
     db.create_all()
     # Add initial diets if not already present
     if not Diet.query.first():
-        diets = ["Vegetarian", "Vegan", "Gluten-Free", "Keto", "Paleo"]
+        diets = ["Vegetarian", "Vegan", "Gluten Free", "Keto", "Paleo"]
         for diet_name in diets:
             diet = Diet(name=diet_name)
             db.session.add(diet)
