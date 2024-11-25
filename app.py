@@ -50,10 +50,9 @@ user_recipes = db.Table(
 # recipe-specific ingredient table. We need a full table because of storing ingredient quantities/units
 class RecipeIngredient(db.Model):
     __tablename__ = "RecipeIngredient"
-    id = db.Column(db.Integer, primary_key=True) # NOTE: may not be needed, not sure if spoonacular duplicates ingredients.
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)
-    quantity = db.Column(db.Integer, nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True, autoincrement=False, nullable=False, default=0)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True, autoincrement=False, nullable=False, default=0)
+    quantity = db.Column(db.Float, nullable=False)
     unit = db.Column(db.String(32), nullable=False)
     
     #orm stuff
@@ -206,7 +205,7 @@ def add_recipe_spoonacular():
         data = spoon.RandomRecipe(1, True)
     else:
         data = spoon.RandomRecipe(1, False)
-    recipe_to_database(data["recipes"][0])
+    add_recipe_to_database(data["recipes"][0])
     return data
 
 @app.route("/add-recipe/json", methods=["POST"])
@@ -216,23 +215,87 @@ def add_recipe_json():
     if filename:
         with open(filename, 'r') as file:
             data = json.load(file)
-    recipe_to_database(data["recipes"][0])
+    add_recipe_to_database(data["recipes"][0])
     return data
     
 
+def add_ingredient_to_database(ingredient):
+    spoonacular_id = int(ingredient["id"])
+    name = ingredient["name"]
+    print(spoonacular_id)
+    print(db.session.query(Ingredient).filter_by(spoonacular_id=spoonacular_id))
+    existing_ingredient = db.session.query(Ingredient).filter_by(spoonacular_id=spoonacular_id).first()
+    if existing_ingredient:
+        existing_ingredient.name = name
+    else:
+        existing_ingredient = Ingredient(spoonacular_id=spoonacular_id, name=name)
+        db.session.add(existing_ingredient)
+    
+    db.session.commit()
+    return existing_ingredient
+
 #NOTE: currently this function does NOT support ingredient-based nutrition information
 #takes single recipe JSON and adds it to our database
-def recipe_to_database(recipe):
+def add_recipe_to_database(recipe):
     #TODO: only add to database if we haven't added it already
     spoonacular_id = recipe["id"]
     name = recipe["title"]
     description = recipe["summary"]
     diets = recipe["diets"]
+    
+    #for now, if a recipe already exists, we re-fill it completely
+    exists = db.session.query(Recipe).filter_by(spoonacular_id=spoonacular_id).first()
+    if exists:
+        db_recipe = exists
+        db_recipe.name = name
+        db_recipe.description = description
+    else:
+        db_recipe = Recipe(spoonacular_id=spoonacular_id, name=name, description=description)
+        db.session.add(db_recipe)
+      
+    #resetting diets and ingredients to be re-filled
+    #TODO: db_recipe.diets...
+    db.session.query(RecipeIngredient).filter_by(recipe_id=db_recipe.id).delete()
+    
+    #ADDING NUTRITION INFO
     if "nutrition" in recipe:
         nutrition = recipe["nutrition"]
-        ingredients = nutrition["ingredients"]
         calories = 0 #TODO: this
         caloric_breakdown = nutrition["caloricBreakdown"]
+    
+    #ADD DIET INFO
+    for diet in diets:
+        pass
+        #TODO: This
+        #NOTE: you have to convert diet string to its id (query by string, get first matching diet ID
+    
+    #ADD INGREDIENT INFO
+    ingredients = recipe["extendedIngredients"]
+    
+    #create ingredients if needed. build our array of ingredient IDs
+    for ingredient in ingredients:
+        #add ingredient
+        ingredient_ref = add_ingredient_to_database(ingredient)
+        #add association
+        amount = float(ingredient["amount"])
+        unit = ingredient["unit"]
+        existing_ri = db.session.query(RecipeIngredient).filter_by(recipe_id=db_recipe.id, ingredient_id=ingredient_ref.id).first()
+        
+        if existing_ri:
+            print(db_recipe.id)
+            print(ingredient_ref.id)
+            existing_ri.amount = amount
+            existing_ri.unit = unit
+        else:
+            print(db_recipe.id)
+            print(ingredient_ref.id)
+            recipe_ingredient = RecipeIngredient(recipe_id=db_recipe.id, ingredient_id=ingredient_ref.id, quantity=amount, unit=unit)
+            db.session.add(recipe_ingredient)
+    db.session.commit()
+    return db_recipe
+      
+      
+    
     
 
 @app.route("/preferences", methods=["GET", "POST"])
