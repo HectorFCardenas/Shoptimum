@@ -29,3 +29,9 @@ db.sqlite
 
 # Environment variables
 *.env
+
+#config folder for api keys
+config/
+
+#json files used for recipe testing
+json_tests/

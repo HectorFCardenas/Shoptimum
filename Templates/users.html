@@ -7,7 +7,17 @@
     <h2>Registered Users</h2>
     <ul>
         {% for user in users %}
-            <li>{{ user.diets }}</li>
+            <li>
+                <strong>username: {{ user.username }}</strong>
+                <br>DIET</br>
+                <ul>
+                    {%for diet in user.diets %}
+                    <li> {{ diet.name }} </li>
+                    {% endfor %}
+                </ul>
+                <!-- END OF USER CODE -->
+            <br>
+            </li>
         {% endfor %}
     </ul>
 </body>
