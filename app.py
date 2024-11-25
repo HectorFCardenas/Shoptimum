@@ -119,13 +119,12 @@ class Ingredient(db.Model):
 #NOTE: skipping allergies for now since spoonacular doesn't list them
 #NOTE: recipe needs to store the recipe description, as well as amount per ingredient
 #NOTE: if we have time, add an ingredient table with per-ingredient information (per serving?)
+#NOTE: use DB Browser to look at current database status (no need for HTML printing it all)
 
+#TODO: macros, total calories, and cook time for each recipe
 
-#TODO: test adding a recipe to the database
-#TODO: write "recipes" html to display all recipes
 #TODO: test adding a user-recipe relationship
 #TODO: update "users" html to display user-recipe info
-#TODO: add support for recipe nutrition (carb/fat/protein %, total calories, cook time)
 
 with app.app_context():
     db.create_all()
@@ -222,8 +221,6 @@ def add_recipe_json():
 def add_ingredient_to_database(ingredient):
     spoonacular_id = int(ingredient["id"])
     name = ingredient["name"]
-    print(spoonacular_id)
-    print(db.session.query(Ingredient).filter_by(spoonacular_id=spoonacular_id))
     existing_ingredient = db.session.query(Ingredient).filter_by(spoonacular_id=spoonacular_id).first()
     if existing_ingredient:
         existing_ingredient.name = name
@@ -237,7 +234,6 @@ def add_ingredient_to_database(ingredient):
 #NOTE: currently this function does NOT support ingredient-based nutrition information
 #takes single recipe JSON and adds it to our database
 def add_recipe_to_database(recipe):
-    #TODO: only add to database if we haven't added it already
     spoonacular_id = recipe["id"]
     name = recipe["title"]
     description = recipe["summary"]
@@ -253,8 +249,8 @@ def add_recipe_to_database(recipe):
         db_recipe = Recipe(spoonacular_id=spoonacular_id, name=name, description=description)
         db.session.add(db_recipe)
       
-    #resetting diets and ingredients to be re-filled
-    #TODO: db_recipe.diets...
+    #resetting ingredients to be re-filled
+    db_recipe.diets = []
     db.session.query(RecipeIngredient).filter_by(recipe_id=db_recipe.id).delete()
     
     #ADDING NUTRITION INFO
@@ -265,10 +261,13 @@ def add_recipe_to_database(recipe):
     
     #ADD DIET INFO
     for diet in diets:
-        pass
-        #TODO: This
-        #NOTE: you have to convert diet string to its id (query by string, get first matching diet ID
-    
+        #get diet ID from diet name
+        curr_diet = db.session.query(Diet).filter_by(name=diet).first()
+        if not curr_diet:
+            curr_diet = Diet(name=diet)
+            db.session.add(curr_diet)
+        db_recipe.diets.append(curr_diet)
+        
     #ADD INGREDIENT INFO
     ingredients = recipe["extendedIngredients"]
     
@@ -282,13 +281,9 @@ def add_recipe_to_database(recipe):
         existing_ri = db.session.query(RecipeIngredient).filter_by(recipe_id=db_recipe.id, ingredient_id=ingredient_ref.id).first()
         
         if existing_ri:
-            print(db_recipe.id)
-            print(ingredient_ref.id)
             existing_ri.amount = amount
             existing_ri.unit = unit
         else:
-            print(db_recipe.id)
-            print(ingredient_ref.id)
             recipe_ingredient = RecipeIngredient(recipe_id=db_recipe.id, ingredient_id=ingredient_ref.id, quantity=amount, unit=unit)
             db.session.add(recipe_ingredient)
     db.session.commit()
