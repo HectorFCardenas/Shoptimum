@@ -99,6 +99,15 @@ class Recipe(db.Model):
     spoonacular_id = db.Column(db.Integer, unique=True, nullable=False)
     name = db.Column(db.String(250), unique=False, nullable=False)  # i think spoonacular might have duplicate recipe names
     description = db.Column(db.String)
+    instructions = db.Column(db.String)
+    source_url = db.Column(db.String)
+    fat_percent = db.Column(db.Float, default=33.3)
+    carb_percent = db.Column(db.Float, default=33.3)
+    protein_percent = db.Column(db.Float, default=33.3)
+    calories = db.Column(db.Integer, default=0)
+    cost = db.Column(db.Float) #cost in cents (per serving)
+    cook_time = db.Column(db.Integer) #in minutes
+    servings = db.Column(db.Integer)
     
     #relational ORM stuff (not part of schema)
     diets = db.relationship("Diet", secondary=recipe_diets, backref=db.backref("recipe", lazy="dynamic"))
@@ -235,31 +244,43 @@ def add_ingredient_to_database(ingredient):
 #takes single recipe JSON and adds it to our database
 def add_recipe_to_database(recipe):
     spoonacular_id = recipe["id"]
-    name = recipe["title"]
-    description = recipe["summary"]
-    diets = recipe["diets"]
     
     #for now, if a recipe already exists, we re-fill it completely
     exists = db.session.query(Recipe).filter_by(spoonacular_id=spoonacular_id).first()
     if exists:
         db_recipe = exists
-        db_recipe.name = name
-        db_recipe.description = description
     else:
-        db_recipe = Recipe(spoonacular_id=spoonacular_id, name=name, description=description)
+        db_recipe = Recipe(spoonacular_id=spoonacular_id)
         db.session.add(db_recipe)
-      
+    
+    #SETTING ALL BASIC VALUES
+    db_recipe.name = recipe["title"]
+    db_recipe.description = recipe["summary"]
+    db_recipe.instructions = recipe["instructions"]
+    db_recipe.source_url = recipe["sourceUrl"]
+    db_recipe.cost = float(recipe["pricePerServing"])
+    db_recipe.cook_time = int(recipe["readyInMinutes"])
+    db_recipe.servings = int(recipe["servings"])
+    
     #resetting ingredients to be re-filled
     db_recipe.diets = []
     db.session.query(RecipeIngredient).filter_by(recipe_id=db_recipe.id).delete()
     
+    #TODO: everything in this if statement should be given a default value
     #ADDING NUTRITION INFO
     if "nutrition" in recipe:
         nutrition = recipe["nutrition"]
-        calories = 0 #TODO: this
         caloric_breakdown = nutrition["caloricBreakdown"]
-    
+        db_recipe.fat_percent = float(caloric_breakdown["percentFat"])
+        db_recipe.carb_percent = float(caloric_breakdown["percentCarbs"])
+        db_recipe.protein_percent = float(caloric_breakdown["percentProtein"])
+        for nutrient in nutrition["nutrients"]:
+            nut_type = nutrient["name"]
+            if nut_type == "Calories":
+                db_recipe.calories = int(nutrient["amount"])
+      
     #ADD DIET INFO
+    diets = recipe["diets"]
     for diet in diets:
         #get diet ID from diet name
         curr_diet = db.session.query(Diet).filter_by(name=diet).first()
