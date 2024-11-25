@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Button</title>
+</head>
+<body>
+	<strong>TWO OPTIONS</strong><br>
+	<br><strong>OPTION 1:</strong>
+	<br>Query spoonacular for recipe and add to database (+1.01 points) </br>
+    <form action="/add-recipe/spoonacular" method="POST">
+        <label for="ingredient_info">Ingredient Info (+.5 points):</label>
+        <input type="checkbox" name="ingredient_info" id="ingredient_info">
+        <button type="submit">Submit</button>
+    </form>
+	
+	<br><strong>OPTION 2:</strong>
+	<br>Type in json file name and add to database (0 points) </br>
+	<form action="/add-recipe/json" method="POST">
+		<input type="text" name="filename" placeholder="json_tests/random_recipe.json" required>
+		<button type="submit">Submit</button>
+	</form>
+	
+
+</body>
+</html>

@@ -9,6 +9,9 @@ from flask_login import (
     login_required,
 )
 
+import spoonacular_calls as spoon
+import json
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 app.config["SECRET_KEY"] = "abc"
@@ -37,6 +40,12 @@ recipe_diets = db.Table(
     db.Column("diet_id", db.Integer, db.ForeignKey("diet.id"), primary_key=True),
 )
 
+user_recipes = db.Table(
+    "user_recipes",
+    db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
+    db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"), primary_key=True),
+)
+
 
 # recipe-specific ingredient table. We need a full table because of storing ingredient quantities/units
 class RecipeIngredient(db.Model):
@@ -57,6 +66,7 @@ class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(250), unique=True, nullable=False)
     password = db.Column(db.String(250), nullable=False)
+    
     # Relationships
     diets = db.relationship(
         "Diet", secondary=diet_preferences, backref=db.backref("users", lazy="dynamic")
@@ -66,6 +76,8 @@ class Users(UserMixin, db.Model):
         secondary=allergies_association,
         backref=db.backref("users", lazy="dynamic"),
     )
+    recipes = db.relationship("Recipe", secondary=user_recipes, backref=db.backref("users", lazy="dynamic"))
+    
     @property
     def has_filled_preferences(self):
         return bool(self.diets) or bool(self.allergies)
@@ -81,9 +93,6 @@ class Allergy(db.Model):
     __tablename__ = "allergy"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
-    
-    # recipe database table
-
 
 class Recipe(db.Model):
     __tablename__ = "recipe"
@@ -110,9 +119,14 @@ class Ingredient(db.Model):
 
 #NOTE: skipping allergies for now since spoonacular doesn't list them
 #NOTE: recipe needs to store the recipe description, as well as amount per ingredient
-#TODO: if we have time, add an ingredient table with per-ingredient information (per serving?)
+#NOTE: if we have time, add an ingredient table with per-ingredient information (per serving?)
 
 
+#TODO: test adding a recipe to the database
+#TODO: write "recipes" html to display all recipes
+#TODO: test adding a user-recipe relationship
+#TODO: update "users" html to display user-recipe info
+#TODO: add support for recipe nutrition (carb/fat/protein %, total calories, cook time)
 
 with app.app_context():
     db.create_all()
@@ -181,6 +195,45 @@ def logout():
 def home():
     return render_template("home.html")
 
+@app.route("/add-recipe/test")
+def recipe_test():
+    return render_template("add_recipe.html")
+    
+@app.route("/add-recipe/spoonacular", methods=["POST"])
+def add_recipe_spoonacular():
+    ingredient_info = request.form.get('ingredient_info')
+    if ingredient_info:
+        data = spoon.RandomRecipe(1, True)
+    else:
+        data = spoon.RandomRecipe(1, False)
+    recipe_to_database(data["recipes"][0])
+    return data
+
+@app.route("/add-recipe/json", methods=["POST"])
+def add_recipe_json():
+    filename = request.form.get('filename')
+    data = None
+    if filename:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+    recipe_to_database(data["recipes"][0])
+    return data
+    
+
+#NOTE: currently this function does NOT support ingredient-based nutrition information
+#takes single recipe JSON and adds it to our database
+def recipe_to_database(recipe):
+    #TODO: only add to database if we haven't added it already
+    spoonacular_id = recipe["id"]
+    name = recipe["title"]
+    description = recipe["summary"]
+    diets = recipe["diets"]
+    if "nutrition" in recipe:
+        nutrition = recipe["nutrition"]
+        ingredients = nutrition["ingredients"]
+        calories = 0 #TODO: this
+        caloric_breakdown = nutrition["caloricBreakdown"]
+    
 
 @app.route("/preferences", methods=["GET", "POST"])
 @login_required
@@ -218,8 +271,6 @@ def preferences():
 def show_users():
     users = Users.query.all()
     return render_template('users.html', users=users)
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
