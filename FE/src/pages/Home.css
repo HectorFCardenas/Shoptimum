@@ -1,0 +1,24 @@
+/* src/components/Home.css */
+
+.home-page {
+    height: 100vh;
+    width: 100%;
+    background-color: #f7f7f7; /* Light background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #333;
+  }
+  
+  .home-page h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .home-page p {
+    font-size: 1.2em;
+    color: #555;
+  }

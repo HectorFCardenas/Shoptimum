@@ -1,10 +1,11 @@
 import React from 'react';
+import './Home.css';
 
 function Home() {
   return (
-    <div className="page">
-      <h2>Welcome to Shoptimum</h2>
-      <p>Your personalized grocery shopping assistant.</p>
+    <div className="home-page">
+      <h1>Home Page</h1>
+      <p>Welcome to the home page of Shoptimum. Start exploring!</p>
     </div>
   );
 }
