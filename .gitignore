@@ -35,3 +35,6 @@ config/
 
 #json files used for recipe testing
 json_tests/
+
+# Node.js dependencies
+node_modules/
