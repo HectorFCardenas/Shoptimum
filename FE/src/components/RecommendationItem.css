@@ -1,0 +1,16 @@
+/* src/components/RecommendationItem.css */
+
+.recommendation-item {
+    border: 1px solid #bdc3c7;
+    padding: 15px;
+    width: calc(50% - 20px);
+  }
+  
+  .recommendation-item h3 {
+    margin-top: 0;
+  }
+  
+  .recommendation-item button {
+    margin-top: 10px;
+  }
+  

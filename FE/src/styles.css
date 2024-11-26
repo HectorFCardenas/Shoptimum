@@ -1,0 +1,37 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .page {
+    padding: 20px;
+  }
+  
+  h2 {
+    color: #333;
+  }
+  
+  .preferences-form label {
+    display: block;
+    margin-bottom: 15px;
+  }
+  
+  .preferences-form input,
+  .preferences-form select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+  }
+  
+  .preferences-form button {
+    padding: 10px 20px;
+  }
+  
+  .recommendations-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
