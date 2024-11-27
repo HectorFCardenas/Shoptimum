@@ -1,0 +1,148 @@
+/* Preferences.css */
+
+.preferences-container {
+    font-family: 'Roboto', sans-serif;
+    padding: 30px;
+    max-width: 900px;
+    margin: 50px auto;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .preferences-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #2d3748;
+    margin-bottom: 30px;
+  }
+  
+  .preferences-form {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  
+  .preferences-section {
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .preferences-section h3 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #2d3748;
+  }
+  
+  .preferences-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .preferences-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #4a5568;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .preferences-option input {
+    accent-color: #4299e1;
+    transform: scale(1.2);
+  }
+  
+  .banned-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .preferences-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .preferences-input:focus {
+    border-color: #4299e1;
+    outline: none;
+  }
+  
+  .add-button {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-button:hover {
+    background: #3182ce;
+  }
+  
+  .banned-list {
+    list-style: none;
+    margin-top: 15px;
+    padding: 0;
+  }
+  
+  .banned-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #2d3748;
+  }
+  
+  .remove-button {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .remove-button:hover {
+    background: #c53030;
+  }
+  
+  .preferences-button {
+    width: 100%;
+    padding: 15px;
+    background: #4299e1;
+    color: white;
+    font-size: 1.3rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .preferences-button:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+  }
