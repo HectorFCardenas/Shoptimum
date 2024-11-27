@@ -1,0 +1,58 @@
+.set-recommendations-page {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  h1 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+  }
+  
+  .diet-options, .recipes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .diet-bubble, .recipe-bubble {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .diet-bubble.selected, .recipe-bubble.selected {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+  }
+  
+  .diet-bubble:hover, .recipe-bubble:hover {
+    transform: scale(1.1);
+  }
+  
+  .next-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .next-button:disabled {
+    background-color: #ddd;
+    color: #aaa;
+    cursor: not-allowed;
+  }
+  
+  .next-button:hover:not(:disabled) {
+    background-color: #2980b9;
+    transform: scale(1.05);
+  }

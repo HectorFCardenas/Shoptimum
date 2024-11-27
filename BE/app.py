@@ -205,6 +205,10 @@ def set_meal_plan(date):
         }
     )
 
+@app.route("/mealplans/check", methods=["GET"])
+def check_mealplans():
+    meal_plan_exists = db.session.query(MealPlan).first() is not None
+    return jsonify({"exists": meal_plan_exists})
 
 if __name__ == "__main__":
     app.run(debug=True)

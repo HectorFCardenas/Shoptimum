@@ -4,6 +4,7 @@ import './Login.css';
 
 function Login() {
   const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleKeyPress = (event) => {
@@ -12,9 +13,20 @@ function Login() {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (name.trim() !== '') {
-      navigate('/home'); // Navigate to the home page
+      try {
+        const response = await fetch('http://127.0.0.1:5000/mealplans/check');
+        const data = await response.json();
+        if (data.exists) {
+          navigate('/home'); // Navigate to the home page
+        } else {
+          navigate('/set-initial-recommendations'); // Navigate to recommendations setup
+        }
+      } catch (error) {
+        console.error('Error checking meal plans:', error);
+        alert('Something went wrong. Please try again.');
+      }
     }
   };
 
@@ -43,8 +55,8 @@ function Login() {
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyPress}
         />
-        <button onClick={handleLogin} disabled={name.trim() === ''}>
-          Login
+        <button onClick={handleLogin} disabled={name.trim() === '' || loading}>
+          {loading ? 'Loading...' : 'Login'}
         </button>
       </div>
     </div>
