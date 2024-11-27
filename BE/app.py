@@ -11,7 +11,7 @@ from flask_login import (
 )
 from flask_cors import CORS
 
-import spoonacular_calls as spoon
+import BE.spoonacular_calls as spoon
 import json
 
 app = Flask(__name__)
